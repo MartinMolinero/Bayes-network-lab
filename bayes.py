@@ -15,6 +15,13 @@ class Node:
     def setName(self, name):
         self.name = name
 
+    def setProbability(self, key, probability):
+        print(key + 'p:' + probability)
+        self.ptable.update({key:probability})
+        print(self.ptable)
+
+    def getProbabilityTable():
+        return self.ptable;
 
 
 
@@ -27,7 +34,7 @@ class Network:
 
     def find(self, name):
         for node in self.nodes:
-            if node.name == name:
+            if node.name == str(name):
                 return node
 
 
@@ -37,22 +44,27 @@ class Network:
 def main():
     nodes = []
     inputnodes = input()
-    print(inputnodes)
     nodes = inputnodes.replace(' ', '').split(',')
     #nodes = inputnodes.split(',')
     for i in range(len(nodes)):
         nodes[i] = Node(nodes[i], None)
-        print(nodes[i].__dict__)
-    print(nodes)
-
+    net = Network(nodes)
     inputprobs = int(input())
     probs = []
     for i in range(inputprobs):
-
         probs.append(input())
         probs[i] = probs[i].replace(' ', '').replace('=', '@').replace('|', '@').split('@')
-        #if len(probs[i]) > 0:
+        current = net.find(str(probs[i][0][1:]))
+        print("current" + str(current))
+        print(str(probs[i][0][1:]))
 
+        if len(probs[i]) > 2:
+            current.setProbability(''.join(probs[i][1:-2]), probs[i][-1])
+        else:
+            current.setProbability(probs[i][0], probs[i][-1])
+
+
+        print("local result " + str(probs[i]))
         #probs[i] = probs[i][-1].split('=')
     print(probs)
     print(probs[0][0])
