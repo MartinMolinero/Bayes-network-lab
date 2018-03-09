@@ -1,2 +1,2 @@
 #!/bin/sh
-python2 bayes.py
+python3 bayes.py < ill.in

@@ -4,7 +4,7 @@ import sys
 class Node:
     def __init__(self, name, parents):
         self.name = name
-        self.parents = parent
+        self.parents = parents
 
 class Network:
     def __init__(self, nodes):
@@ -17,15 +17,19 @@ class Network:
 
 def main():
     nodes = []
-    inputnodes = sys.stdin.readline().rstrip()
+    inputnodes = input()
+    print(inputnodes)
     inputnodes = inputnodes.replace(' ', '')
     nodes = inputnodes.split(',')
-    for node in nodes:
-        
+    for i in range(0, len(nodes)):
+        auxnode = Node(nodes[i], None)
+        nodes[i] = auxnode
+        print(nodes[i].__dict__)
     print(nodes)
-    inputprobs = int(sys.stdin.readline().rstrip())
-    print("probs" + str(inputprobs))
+    inputprobs = int(input())
+    probs = []
     for i in range(0,inputprobs):
+        probs[i] = input()
 
 
 if __name__ == "__main__":
