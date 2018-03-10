@@ -60,8 +60,7 @@ def main():
         current = copy.deepcopy(net.find(str(probs[i][0][1:])))
         if len(probs[i]) > 2:
             current.setProbability(''.join(probs[i][0:-1]), probs[i][-1])
-            print(probs[i][1:-1])
-            current.setParents(probs[i][1:-1])
+            current.setParents(probs[i][1:-1][0].split(','))
             print(current.__dict__)
         else:
             current.setProbability(probs[i][0], probs[i][-1])
