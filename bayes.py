@@ -1,4 +1,5 @@
 import re
+import copy
 import sys
 
 class Node:
@@ -8,6 +9,7 @@ class Node:
     def __init__(self, name, parents):
         self.name = name
         self.parents = parents
+        self.ptable = {}
 
     def setParents(self, parents):
         self.parents = parents
@@ -16,7 +18,6 @@ class Node:
         self.name = name
 
     def setProbability(self, key, probability):
-        print(key + 'p:' + probability)
         self.ptable.update({key:probability})
         print(self.ptable)
 
@@ -45,7 +46,6 @@ def main():
     nodes = []
     inputnodes = input()
     nodes = inputnodes.replace(' ', '').split(',')
-    #nodes = inputnodes.split(',')
     for i in range(len(nodes)):
         nodes[i] = Node(nodes[i], None)
     net = Network(nodes)
@@ -54,20 +54,12 @@ def main():
     for i in range(inputprobs):
         probs.append(input())
         probs[i] = probs[i].replace(' ', '').replace('=', '@').replace('|', '@').split('@')
-        current = net.find(str(probs[i][0][1:]))
-        print("current" + str(current))
-        print(str(probs[i][0][1:]))
-
+        current = copy.deepcopy(net.find(str(probs[i][0][1:])))
         if len(probs[i]) > 2:
-            current.setProbability(''.join(probs[i][1:-2]), probs[i][-1])
+            current.setProbability(''.join(probs[i][0:-1]), probs[i][-1])
         else:
             current.setProbability(probs[i][0], probs[i][-1])
 
-
-        print("local result " + str(probs[i]))
-        #probs[i] = probs[i][-1].split('=')
-    print(probs)
-    print(probs[0][0])
     inputqueries = int(input())
     queryarr = []
     for i in range(inputqueries):
