@@ -21,8 +21,11 @@ class Node:
         self.name = name
 
     def setProbability(self, key, probability):
+        probability = float(probability)
         self.ptable.update({key:probability})
-        print(self.ptable)
+
+    def getProbability(self, key):
+        return self.ptable.get(str(key))
 
     def getProbabilityTable():
         return self.ptable;
@@ -64,7 +67,8 @@ def main():
             print(current.__dict__)
         else:
             current.setProbability(probs[i][0], probs[i][-1])
-
+            current.setProbability('-' + str(probs[i][0][1:]),1 - current.getProbability(probs[i][0]))
+        print(current.__dict__)
     inputqueries = int(input())
     queryarr = []
     for i in range(inputqueries):
