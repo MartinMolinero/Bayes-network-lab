@@ -53,6 +53,27 @@ class Network:
 def stringWithoutSign(string):
     return string[1:]
 
+def computeProbability(query):
+    hypothesis = query[0]
+    if len(query) == 1:
+        node = net.find(stringWithoutSign(hypothesis))
+        if node.parents is None:
+            returnSingleProbability(node, hypothesis)
+        else:
+            print("query actual", query)
+            #compute total probability
+            total = 0.0
+            #probar esto con grasswet
+            for key, value in node.ptable.items():
+                print(key, value)
+                pass
+    elif len(query) > 1:
+        evidence = query[1]
+        numerator = query[0].split(',')
+        denominator = query[1].split(',')
+        newQuery = ''.join(numerator)
+        newQuery += ''.join(denominator)
+        print("newQuery", newQuery)
 
 
 def returnSingleProbability(node, string):
@@ -62,31 +83,15 @@ def returnSingleProbability(node, string):
 def processQueries():
     inputqueries = int(input())
     queryarr = []
-
     for i in range(inputqueries):
         queryarr.append(input())
     print(queryarr)
     current = []
     for q in queryarr:
         current = q.split('|')
-        hypothesis = current[0]
-        if len(current) == 1:
-            node = net.find(stringWithoutSign(hypothesis))
-            if node.parents is None:
-                returnSingleProbability(node, hypothesis)
-            else:
-                #compute total probability
-                total = 0.0
-                #probar esto con grasswet
-                for key, value in node.ptable.items():
-                    print("HASH VALUE")
-                    print (key, value)
-                    #hasta aquí me quedé, aquí deberíamos viajar por la p condicional del nodo dado los padres * value
-                pass
-        elif len(current) > 1:
-            evidence = current[1]
-            numerator = current[0].split(',')
-            denominator = current[1].split(',')
+        computeProbability(current)
+
+
 
 
 
@@ -126,7 +131,7 @@ def main():
             #obtener cada match de +prob -prob y regresarlo en un array
             string = re.findall('[+|-][a-zA-Z0-9]*', string)
             #sort alfabeticamente
-            string = sorted(string)
+            #string = sorted(string)
             #concatenarlo
             string=''.join(string)
             #igualar ese string a nuestro hash de probabilidades con la probabilidad dada en el input
