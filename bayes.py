@@ -14,8 +14,10 @@ class Node:
     def setParents(self, parents):
         for i in range(len(parents)):
             parents[i] = parents[i].replace('+', '').replace('-', '')
-            print(parents[i])
+        #checar esto, puede que después sobreescriba la lista de padres, preferiría tener un append a self parents
+        #y que cada padre se agregara en el for de arriba a menos que ya esté antes
         self.parents = parents
+
 
     def setName(self, name):
         self.name = name
@@ -27,8 +29,12 @@ class Node:
     def getProbability(self, key):
         return self.ptable.get(str(key))
 
-    def getProbabilityTable():
-        return self.ptable;
+    def getProbabilityTable(self):
+        return self.ptable
+
+    def getParents(self):
+        return self.parents
+
 
 
 
@@ -44,36 +50,100 @@ class Network:
             if node.name == str(name):
                 return node
 
+def stringWithoutSign(string):
+    return string[1:]
+
+
+
+def returnSingleProbability(node, string):
+    p = node.getProbability(string)
+    print(p)
+
+def processQueries():
+    inputqueries = int(input())
+    queryarr = []
+
+    for i in range(inputqueries):
+        queryarr.append(input())
+    print(queryarr)
+    current = []
+    for q in queryarr:
+        current = q.split('|')
+        hypothesis = current[0]
+        if len(current) == 1:
+            node = net.find(stringWithoutSign(hypothesis))
+            if node.parents is None:
+                returnSingleProbability(node, hypothesis)
+            else:
+                #compute total probability
+                total = 0.0
+                #probar esto con grasswet
+                for key, value in node.ptable.items():
+                    print("HASH VALUE")
+                    print (key, value)
+                    #hasta aquí me quedé, aquí deberíamos viajar por la p condicional del nodo dado los padres * value
+                pass
+        elif len(current) > 1:
+            evidence = current[1]
+            numerator = current[0].split(',')
+            denominator = current[1].split(',')
 
 
 
 
 def main():
+    #arreglo de nodos vacío
     nodes = []
+    #leer nodos de input
     inputnodes = input()
+    #limpiar el input y separar los nodos por coma
     nodes = inputnodes.replace(' ', '').split(',')
+    #para cada estructura en el arreglo local, crear estructura de datos nodo
     for i in range(len(nodes)):
+        #crear un nodo sólo con su nombre
         nodes[i] = Node(nodes[i], None)
+    #crear la red con los nodos preeliminares
+    global net
     net = Network(nodes)
+    #preparación para leer los nodos del input
     inputprobs = int(input())
+    #arreglo de probabilidades
     probs = []
+    #leer cada probabilidad por separado
     for i in range(inputprobs):
+        #leer de input
         probs.append(input())
+        #procesarla
         probs[i] = probs[i].replace(' ', '').replace('=', '@').replace('|', '@').split('@')
-        current = copy.deepcopy(net.find(str(probs[i][0][1:])))
+        #quité el deepcopy porque lo que necesitabamos era que sí hiciera los cambios en la estructura net,
+        #si dejábamos deepcopy sólo hacía el cambio en una variable local, la tabla de probs ya se hace bien de acuerdo a los inputprobs
+        #buscar el nodo actual que se insertó en la probabilidad dentro de la network
+        current = net.find(str(probs[i][0][1:]))
+        #si es una probabilidad con padres
         if len(probs[i]) > 2:
-            current.setProbability(''.join(probs[i][0:-1]), probs[i][-1])
+            #concatenar el string con los nombres de nodos con ''.join...
+            string = ''.join(probs[i][0:-1])
+            #obtener cada match de +prob -prob y regresarlo en un array
+            string = re.findall('[+|-][a-zA-Z0-9]*', string)
+            #sort alfabeticamente
+            string = sorted(string)
+            #concatenarlo
+            string=''.join(string)
+            #igualar ese string a nuestro hash de probabilidades con la probabilidad dada en el input
+            current.setProbability(string, probs[i][-1])
+            #asignar los padres al nodo
             current.setParents(probs[i][1:-1][0].split(','))
-            print(current.__dict__)
         else:
+        #si es una probabilidad sencilla (sin padres)
+            #construye su probabilidad dada
             current.setProbability(probs[i][0], probs[i][-1])
+            #asignar la probabilidad a su complemento, 1- prob dada anterior
             current.setProbability('-' + str(probs[i][0][1:]),1 - current.getProbability(probs[i][0]))
-        print(current.__dict__)
-    inputqueries = int(input())
-    queryarr = []
-    for i in range(inputqueries):
-        queryarr.append(input())
-    #print(queryarr)
+
+    for node in net.nodes:
+        print(node.__dict__)
+    processQueries()
+
 
 
 if __name__ == "__main__":

@@ -1,0 +1,13 @@
+Test,Ill
+3
++Ill=0.001
++Test|+Ill=0.9
++Test|-Ill=0.5
+7
++Ill
+-Ill
++Ill|+Test
++Test
+-Test
++Test|+Ill
++Test|-Ill

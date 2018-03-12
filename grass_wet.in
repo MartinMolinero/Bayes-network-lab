@@ -1,0 +1,15 @@
+Sprinkler,Rain,GrassWet
+7
++Rain=0.2
++Sprinkler|-Rain=0.4
++Sprinkler|+Rain=0.01
++GrassWet|+Rain,+Sprinkler=0.99
++GrassWet|+Rain,-Sprinkler=0.8
++GrassWet|-Rain,+Sprinkler=0.9
++GrassWet|-Rain,-Sprinkler=0.0
+5
++GrassWet|-Rain
++GrassWet
++Rain
++Rain|+GrassWet
++Rain,+Sprinkler|+GrassWet
