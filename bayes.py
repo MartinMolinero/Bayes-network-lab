@@ -88,7 +88,7 @@ def computeProbability(query):
                 result = result + totalProbability(n)
                 for key, value in node.ptable.items():
                     print(key, value)
-                    nxt = re.findall('[+|-][a-zA-Z0-9]*', key)[1:]s
+                    nxt = re.findall('[+|-][a-zA-Z0-9]*', key)[1:]
 
 
     elif len(query) > 1:
@@ -97,7 +97,7 @@ def computeProbability(query):
         denominator = query[1].split(',')
         newQuery = ''.join(numerator)
         newQuery += ''.join(denominator)
-        node = net.find(stringWithoutSign(numerator))
+        strings = numerator + denominator
         for i in range(len(strings)):
             strings[i] = stringWithoutSign(strings[i])
 
