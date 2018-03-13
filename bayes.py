@@ -54,6 +54,25 @@ class Network:
 def stringWithoutSign(string):
     return string[1:]
 
+def getWithHiddenNodes(nodes):
+    print("recibe", nodes)
+    result = nodes
+    for node in result:
+    #for node in nodes:
+        node = net.find(node)
+        if node.parents is not None:
+            for parent in node.parents:
+                if not parent in result:
+                    result.append(parent)
+        else:
+            pass
+    return result
+
+def totalProbability(node, query):
+    total = 0.0
+
+
+
 def computeProbability(query):
     hypothesis = query[0]
     if len(query) == 1:
@@ -61,19 +80,30 @@ def computeProbability(query):
         if node.parents is None:
             returnSingleProbability(node, hypothesis)
         else:
+            n = [stringWithoutSign(hypothesis)]
+            total_nodes = getWithHiddenNodes(n)
             print("query actual", query)
             #compute total probability
-            total = 0.0
-            #probar esto con grasswet
-            for key, value in node.ptable.items():
-                print(key, value)
-                pass
+            result = 0
+            for node in total_nodes:
+                result = result + totalProbability(n)
+                for key, value in node.ptable.items():
+                    print(key, value)
+                    nxt = re.findall('[+|-][a-zA-Z0-9]*', key)[1:]s
+
+
     elif len(query) > 1:
         evidence = query[1]
         numerator = query[0].split(',')
         denominator = query[1].split(',')
         newQuery = ''.join(numerator)
         newQuery += ''.join(denominator)
+        node = net.find(stringWithoutSign(numerator))
+        for i in range(len(strings)):
+            strings[i] = stringWithoutSign(strings[i])
+
+        print("hidden", getWithHiddenNodes(strings))
+
         print("newQuery", newQuery)
 
 
