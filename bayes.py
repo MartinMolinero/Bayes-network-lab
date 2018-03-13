@@ -89,7 +89,7 @@ def computeProbability(query):
                 result = result + totalProbability(n)
                 for key, value in node.ptable.items():
                     print(key, value)
-                    nxt = re.findall('[+|-][a-zA-Z0-9]*', key)[1:]s
+                    nxt = re.findall('[+|-][a-zA-Z0-9]*', key)[1:]
 
 
     elif len(query) > 1:
