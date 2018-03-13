@@ -1,6 +1,7 @@
 import re
 import copy
 import sys
+from decimal import Decimal
 
 class Node:
     parents = []
@@ -128,23 +129,27 @@ def main():
         if len(probs[i]) > 2:
             #concatenar el string con los nombres de nodos con ''.join...
             string = ''.join(probs[i][0:-1])
-            #obtener cada match de +prob -prob y regresarlo en un array
-            string = re.findall('[+|-][a-zA-Z0-9]*', string)
             #sort alfabeticamente
-            #string = sorted(string)
-            #concatenarlo
-            string=''.join(string)
             #igualar ese string a nuestro hash de probabilidades con la probabilidad dada en el input
             current.setProbability(string, probs[i][-1])
+            if (string[0] == '+'):
+                current.setProbability('-' + string[1:],'%.7f'%(Decimal('1') - Decimal(str(current.getProbability(string)))))
+            else:
+                current.setProbability('+' + string[1:],'%.7f'%(Decimal('1') - Decimal(str(current.getProbability(string)))))
             #asignar los padres al nodo
             current.setParents(probs[i][1:-1][0].split(','))
+
+
         else:
         #si es una probabilidad sencilla (sin padres)
             #construye su probabilidad dada
             current.setProbability(probs[i][0], probs[i][-1])
             #asignar la probabilidad a su complemento, 1- prob dada anterior
-            current.setProbability('-' + str(probs[i][0][1:]),1 - current.getProbability(probs[i][0]))
-
+            string = ''.join(probs[i][0:-1])
+            if (string[0] == '+'):
+                current.setProbability('-' + string[1:],'%.7f'%(Decimal('1') - Decimal(str(current.getProbability(string)))))
+            else:
+                current.setProbability('+' + string[1:],'%.7f'%(Decimal('1') - Decimal(str(current.getProbability(string)))))
     for node in net.nodes:
         print(node.__dict__)
     processQueries()
