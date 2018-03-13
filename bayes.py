@@ -58,11 +58,13 @@ def stringWithoutSign(string):
     return string[1:]
 
 def getWithHiddenNodes(nodes):
-    result = nodes
+    result = copy.deepcopy(nodes)
     for i in range(len(result)):
         result[i] = result[i].replace('+','').replace('-', '')
+
     for node in result:
     #for node in nodes:
+        print(result)
         node = net.find(node)
         if node.parents is not None:
             for parent in node.parents:
@@ -74,13 +76,13 @@ def getWithHiddenNodes(nodes):
 
 
 def computeProbability(query):
-    print("Q", query)
+    print("recibe", query)
     hypothesis = query[0]
     if len(query) == 1:
         node = net.find(stringWithoutSign(hypothesis))
         if node.parents is None:
             sp = returnSingleProbability(node, hypothesis)
-            return sp
+            return(sp)
         else:
             n = stringWithoutSign(hypothesis)
             node = net.find(n)
@@ -89,57 +91,68 @@ def computeProbability(query):
                 if hypothesis in key:
                     a = key.split(hypothesis)[1]
                     sum += computeProbability([a])*value
-            print("SUM", sum)
-            #total_nodes = getWithHiddenNodes(n)
-            print("query actual", query)
-            #compute total probability
-            result = 0.0
-
-
-            return result
-
-
-
-
-
+            return(sum)
     elif len(query) > 1:
         node = net.find(stringWithoutSign(hypothesis))
         evidence = query[1]
         numerator = query[0].split(',')
         denominator = query[1].split(',')
         total = numerator + denominator
+        print("Total", total)
         tot_with_hidden = getWithHiddenNodes(total)
-        print("DICK", tot_with_hidden)
         newQuery = ''.join(numerator)
         newQuery += ''.join(denominator)
-        print("Node", node.__dict__)
-        print("newQuery", newQuery)
-
+        print("nq", newQuery, node.name)
         sp = returnSingleProbability(node, newQuery)
         if( sp > -1):
             print(sp)
+            return(sp)
         else:
+            added =list( set(tot_with_hidden) - set(total))
+            print("Added", added)
+            print("tot", tot_with_hidden)
+            print("La puta", total)
+            result = 0
+            querystr = ""
+            for position in total:
+                node = net.find(stringWithoutSign(position))
+                print("N: ",node.__dict__)
+                parents = node.parents
+                if(parents is None):
+                    print("Parents none for", node.__dict__)
+                else:
+                    if node.name in position:
+                        querystr += position
+                    for p in parents:
+                        for element in total:
+                            if p in element:
+                                print("found in", p, element)
+                                querystr += element
+                        else:
+                            pass
+            querystr = re.findall('[+|-][a-zA-Z0-9]*', querystr)
+            #chain rule
+            result += computeProbability(querystr)
+            return result
 
             pass
+
 
 
 
 def returnSingleProbability(node, string):
     p = node.getProbability(string)
     return p
-
 def processQueries():
     inputqueries = int(input())
     queryarr = []
     for i in range(inputqueries):
         a= input()
-        a = a.replace(',', '')
         queryarr.append(a)
-    print(queryarr)
     current = []
     for q in queryarr:
         current = q.split('|')
-        computeProbability(current)
+        print(computeProbability(current))
 
 
 
@@ -200,6 +213,8 @@ def main():
                 current.setProbability('-' + string[1:],'%.7f'%(Decimal('1') - Decimal(str(current.getProbability(string)))))
             else:
                 current.setProbability('+' + string[1:],'%.7f'%(Decimal('1') - Decimal(str(current.getProbability(string)))))
+        for node in net.nodes:
+            print(node.__dict__)
     processQueries()
 
 
