@@ -28,7 +28,10 @@ class Node:
         self.ptable.update({key:probability})
 
     def getProbability(self, key):
-        return self.ptable.get(str(key))
+        if (self.ptable.get(str(key))):
+            return self.ptable.get(str(key))
+        else:
+            return -1
 
     def getProbabilityTable(self):
         return self.ptable
@@ -68,17 +71,14 @@ def getWithHiddenNodes(nodes):
             pass
     return result
 
-def totalProbability(node, query):
-    total = 0.0
-
-
 
 def computeProbability(query):
     hypothesis = query[0]
     if len(query) == 1:
         node = net.find(stringWithoutSign(hypothesis))
         if node.parents is None:
-            returnSingleProbability(node, hypothesis)
+            sp = returnSingleProbability(node, hypothesis)
+            print(sp)
         else:
             n = [stringWithoutSign(hypothesis)]
             total_nodes = getWithHiddenNodes(n)
@@ -93,11 +93,20 @@ def computeProbability(query):
 
 
     elif len(query) > 1:
+        node = net.find(stringWithoutSign(hypothesis))
         evidence = query[1]
         numerator = query[0].split(',')
         denominator = query[1].split(',')
         newQuery = ''.join(numerator)
         newQuery += ''.join(denominator)
+        sp = returnSingleProbability(node, newQuery)
+
+        if( sp > -1):
+            print(sp)
+        else:
+            # ... chain rule
+            pass
+
         strings = numerator + denominator
         for i in range(len(strings)):
             strings[i] = stringWithoutSign(strings[i])
@@ -109,7 +118,7 @@ def computeProbability(query):
 
 def returnSingleProbability(node, string):
     p = node.getProbability(string)
-    print(p)
+    return p
 
 def processQueries():
     inputqueries = int(input())
