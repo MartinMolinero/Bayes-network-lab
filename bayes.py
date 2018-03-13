@@ -53,6 +53,22 @@ class Network:
 def stringWithoutSign(string):
     return string[1:]
 
+def getWithHiddenNodes(nodes):
+    print("recibe", nodes)
+    #result =  []
+    result = nodes
+    for node in result:
+    #for node in nodes:
+        node = net.find(node)
+        if node.parents is not None:
+            for parent in node.parents:
+                if not parent in result:
+                    result.append(parent)
+        else:
+            pass
+    return result
+
+
 def computeProbability(query):
     hypothesis = query[0]
     if len(query) == 1:
@@ -60,6 +76,9 @@ def computeProbability(query):
         if node.parents is None:
             returnSingleProbability(node, hypothesis)
         else:
+            n = [stringWithoutSign(hypothesis)]
+            print("Hidden nodes")
+            print(getWithHiddenNodes(n))
             print("query actual", query)
             #compute total probability
             total = 0.0
@@ -73,6 +92,12 @@ def computeProbability(query):
         denominator = query[1].split(',')
         newQuery = ''.join(numerator)
         newQuery += ''.join(denominator)
+        strings = re.findall('[+|-][a-zA-Z0-9]*', newQuery)
+        for i in range(len(strings)):
+            strings[i] = stringWithoutSign(strings[i])
+
+        print("hidden", getWithHiddenNodes(strings))
+
         print("newQuery", newQuery)
 
 
