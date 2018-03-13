@@ -98,7 +98,7 @@ def computeProbability(query):
         denominator = query[1].split(',')
         newQuery = ''.join(numerator)
         newQuery += ''.join(denominator)
-        node = net.find(stringWithoutSign(numerator))
+        strings = numerator + denominator
         for i in range(len(strings)):
             strings[i] = stringWithoutSign(strings[i])
 
