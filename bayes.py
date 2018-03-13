@@ -80,9 +80,16 @@ def computeProbability(query):
         node = net.find(stringWithoutSign(hypothesis))
         if node.parents is None:
             sp = returnSingleProbability(node, hypothesis)
-            return(sp)
+            return sp
         else:
-            n = [stringWithoutSign(hypothesis)]
+            n = stringWithoutSign(hypothesis)
+            node = net.find(n)
+            sum = 0.0
+            for key, value in node.ptable.items():
+                if hypothesis in key:
+                    a = key.split(hypothesis)[1]
+                    sum += computeProbability([a])*value
+            print("SUM", sum)
             #total_nodes = getWithHiddenNodes(n)
             print("query actual", query)
             #compute total probability
