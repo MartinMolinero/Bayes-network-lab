@@ -96,15 +96,31 @@ def probability(query):
         denominator = evidence
         denominator = ','.join(denominator)
         result = probability(intersection) / probability(denominator)
+        print("RESULT", result, probability(intersection) , probability(denominator) )
         return(result)
 
 
     else:
         print("QUE ,", query)
         query = query.split(",")
+        unsigned = []
         if(len(query) > 1 ):
-            #chain rule
-            pass
+            for prob in query:
+                if(prob.find('+') == -1 and prob.find('-') == -1):
+                    print("PROB SIGN", prob.find('+'), prob.find('-'), prob)
+                    unsigned.append(prob)
+            print("Unsigned", unsigned)
+            if (not unsigned):
+                node = net.find(stringWithoutSign(query[0]))
+                query = ''.join(query)
+                print("Encuentra el nodo con", node.__dict__, query)
+                sp = returnSingleProbability(node, query)
+                print("SP", sp)
+                return(sp)
+            else:
+                #chain rule
+                tot_with_hidden = getWithHiddenNodes(query)
+                added =list( set(tot_with_hidden) - set(query))
         else:
             hypothesis = query
             print("QUERYY", hypothesis)
