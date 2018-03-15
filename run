@@ -1,2 +1,2 @@
 #!/bin/sh
-python3 bayes.py < ill.in
+python3 bayes.py < real_ill.in
