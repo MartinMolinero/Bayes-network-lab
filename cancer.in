@@ -1,0 +1,12 @@
+Cancer, Radioactive, Hereditary
+6
++Radioactive=0.3
++Hereditary=0.65
++Cancer|+Radioactive,+Hereditary=0.98
++Cancer|-Radioactive,-Hereditary=0.30
++Cancer|-Radioactive,+Hereditary=0.48
++Cancer|+Radioactive,-Hereditary=0.22
+3
++Cancer
+-Cancer
++Hereditary|-Cancer
