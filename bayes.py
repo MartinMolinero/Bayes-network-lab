@@ -64,7 +64,7 @@ def getWithHiddenNodes(nodes):
         result[i] = result[i].replace('+','').replace('-', '')
 
     for node in result:
-        print(result)
+        #print(result)
         node = net.find(node)
         if node.parents is not None:
             for parent in node.parents:
@@ -74,16 +74,47 @@ def getWithHiddenNodes(nodes):
             pass
     return result
 
+def chainRule(query):
+    #print("ENTERED CHAIN RULE")
+    result = 1.0
+    query_array = query.split(',')
+    #print("CHAIN RULE QUERY ARRAY", query_array)
+    if(len(query_array) > 1):
+        for q in query_array:
+            node = net.find(stringWithoutSign(q))
+            #print("NODE FOUND CHR", node.__dict__)
+            if(node.parents is not None):
+                #obtener de tabla de probabilidad
+                for key, value in node.ptable.items():
+                    #si cada elemento de la probabilidad del ptable, está contenido en el array del query
+                    parents_array = re.findall('[+|-][a-zA-Z0-9]*', key)
+                    difference_list = list(set(parents_array) - set(query_array))
+                    #print("PARENTS ARRAY", parents_array, "QUERY ARRAY", query_array, "DIFFERENCE LIST", difference_list)
+                    if(not difference_list):
+                        result *= value
+                        #print("Entré y ahora el resultado es", result)
+                        break
+                pass
+            else:
+                #return value
+                sp = returnSingleProbability(node, q)
+                result *= sp
+                #print("HASTA DONDE LLEGARÉ", result)
+        return result
+
+
+
+
 def conditional(query):
-    print("CONDITIONAL QUERY", query)
+    #print("CONDITIONAL QUERY", query)
     query = query.split('|')
     hypothesis = query[0]
     evidence = query[1]
-    print("QUERY", query, "HYP", hypothesis, "EVI", evidence)
+    #print("QUERY", query, "HYP", hypothesis, "EVI", evidence)
     total = evidence + hypothesis
-    print("TOTAL", total)
+    #print("TOTAL", total)
     upper = hypothesis + "," + evidence
-    print("UPPER", upper, "EVIDENCE", evidence)
+    #print("UPPER", upper, "EVIDENCE", evidence)
     result = newComputeProbability(upper) / newComputeProbability(evidence)
     return result
 
@@ -93,49 +124,35 @@ def totalProbability(query):
     sum = 0.0
     for key, value in node.ptable.items():
         if query in key:
-
             a = key.split(query)[1]
-            print("KEY", key, "A", a,  "QUERY", query)
+            #print("KEY", key, "A", a,  "QUERY", query)
             sum += newComputeProbability(a)*value
     return(sum)
 
-
-def chainRule(query):
-    query_array = query.split(',')
-
-    pass
-
 def newComputeProbability(query):
-    print("Thequery", query)
+    ##print("Thequery", query)
     query_array = query.split(',')
     unsigned = []
     if(len(query_array) > 1 ):
-        #generatequeries
-        #sum(chainRule(current_query))
-        for prob in query_array:
-            if(prob.find('+') == -1 and prob.find('-') == -1):
-                unsigned.append(prob)
-        if (not unsigned):
-            node = net.find(stringWithoutSign(query_array[0]))
-            new_query = ''.join(query).replace(',', '')
-            print("Encuentra el nodo con", node.__dict__, new_query)
-            sp = returnSingleProbability(node, new_query)
-            print("SP", sp)
-            return(sp)
-        else:
-            #chain rule
-            tot_with_hidden = getWithHiddenNodes(query)
-            added =list( set(tot_with_hidden) - set(query))
-        pass
+        total_related_nodes = getWithHiddenNodes(query_array)
+        #print("TOTAL RELATED NODES ", total_related_nodes)
+
+        for n in total_related_nodes:
+            node = net.find(n)
+            if (node.parents is not None):
+                pass
+
+        cp = chainRule(query)
+        return cp
     else:
         query_probability = str(query_array[0])
         node_name = stringWithoutSign(query_probability)
         node = net.find(node_name)
-        print("NODE NAME, NODE", node_name, node.__dict__)
+        #print("NODE NAME, NODE", node_name, node.__dict__)
         if(node.parents is None):
             #get direct probability from ptable
             sp = returnSingleProbability(node, query_probability)
-            print("ENTERED AND SHOULD RETURN", sp)
+            #print("ENTERED AND SHOULD RETURN", sp)
             return(sp)
         else:
             #total probability
@@ -159,14 +176,14 @@ def processQueries():
     current = []
     for q in queryarr:
         current = q.split('|')
-        print("\nCURRENT QUERY", current)
+        #print("\nCURRENT QUERY", current)
         if (len(current) > 1):
             current = '|'.join(current)
             prob = conditional(current)
         else:
             current = str(current[0])
             prob = newComputeProbability(current)
-        print(prob)
+        print(round(prob, 7))
 
 def main():
     #arreglo de nodos vacío
@@ -222,8 +239,6 @@ def main():
                 current.setProbability('-' + string[1:],'%.7f'%(Decimal('1') - Decimal(str(current.getProbability(string)))))
             else:
                 current.setProbability('+' + string[1:],'%.7f'%(Decimal('1') - Decimal(str(current.getProbability(string)))))
-        for node in net.nodes:
-            print(node.__dict__)
     processQueries()
 
 
