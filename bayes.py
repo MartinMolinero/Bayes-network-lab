@@ -2,6 +2,8 @@ import re
 import copy
 import sys
 from decimal import Decimal
+import itertools
+from operator import itemgetter
 
 #define the node class, with its ptable, parents and name
 class Node:
@@ -64,7 +66,6 @@ def getWithHiddenNodes(nodes):
         result[i] = result[i].replace('+','').replace('-', '')
 
     for node in result:
-        #print(result)
         node = net.find(node)
         if node.parents is not None:
             for parent in node.parents:
@@ -75,7 +76,7 @@ def getWithHiddenNodes(nodes):
     return result
 
 def chainRule(query):
-    #print("ENTERED CHAIN RULE")
+    #print("----ENTERED CHAIN RULE with query----", query)
     result = 1.0
     query_array = query.split(',')
     #print("CHAIN RULE QUERY ARRAY", query_array)
@@ -99,22 +100,19 @@ def chainRule(query):
                 #return value
                 sp = returnSingleProbability(node, q)
                 result *= sp
-                #print("HASTA DONDE LLEGARÉ", result)
+                #print("Result chain rule", result)
         return result
 
 
 
 
 def conditional(query):
-    #print("CONDITIONAL QUERY", query)
+    #print("+++++CONDITIONAL QUERY++++++", query)
     query = query.split('|')
     hypothesis = query[0]
     evidence = query[1]
-    #print("QUERY", query, "HYP", hypothesis, "EVI", evidence)
     total = evidence + hypothesis
-    #print("TOTAL", total)
     upper = hypothesis + "," + evidence
-    #print("UPPER", upper, "EVIDENCE", evidence)
     result = newComputeProbability(upper) / newComputeProbability(evidence)
     return result
 
@@ -125,6 +123,8 @@ def totalProbability(query):
     for key, value in node.ptable.items():
         if query in key:
             a = key.split(query)[1]
+            a= re.findall('[+|-][a-zA-Z0-9]*', a)
+            a = ','.join(a)
             #print("KEY", key, "A", a,  "QUERY", query)
             sum += newComputeProbability(a)*value
     return(sum)
@@ -136,15 +136,54 @@ def newComputeProbability(query):
     #if intersection
     if(len(query_array) > 1 ):
         total_related_nodes = getWithHiddenNodes(query_array)
+        unsigned_query_array = []
+        for i in range(len(query_array)):
+            unsigned_query_array.append(stringWithoutSign(query_array[i]))
         #print("TOTAL RELATED NODES ", total_related_nodes)
+        hidden = list( set(total_related_nodes) -  set(unsigned_query_array))
+        #print("HIDDEN", hidden, "TOTAL RELATED NODES ", total_related_nodes, "QUERY ARRAY", query_array)
+        all_with_signs = []
+        signs =  ['+', '-']
+        product_hidden = list(itertools.product(signs, hidden))
+        product_hidden = sorted(product_hidden, key=itemgetter(1))
+        #print("PRODUCT HIDDEN", product_hidden)
+        if(len(product_hidden) >0 ):
+            x = []
+            product = []
+            newqueries = []
+            for i in range(len(product_hidden)):
+              x.append(''.join(map(str, product_hidden[i])))
 
-        for n in total_related_nodes:
-            node = net.find(n)
-            if (node.parents is not None):
-                pass
+            for i in range(0, len(x), 2):
+                product.append(x[i : i+2])
 
-        cp = chainRule(query)
-        return cp
+            query_string = ''.join(query_array)
+            for t in itertools.product(*product):
+                string =  query_string + t[0]
+                string_arr = re.findall('[+|-][a-zA-Z0-9]*', string)
+                newqueries.append(string_arr)
+
+            for i in range(len(newqueries)):
+                newqueries[i] = ','.join(newqueries[i])
+            #print("QUERY CORRECTA", newqueries)
+            cp = 0.0
+            for q in newqueries:
+                cp += chainRule(q)
+            return(cp)
+        else:
+
+            for n in total_related_nodes:
+                node = net.find(n)
+                if (node.parents is not None):
+                    pass
+
+            cp = chainRule(query)
+            return(cp)
+
+
+
+
+
     else:
         query_probability = str(query_array[0])
         node_name = stringWithoutSign(query_probability)
