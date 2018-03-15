@@ -74,161 +74,74 @@ def getWithHiddenNodes(nodes):
             pass
     return result
 
+def conditional(query):
+    print("CONDITIONAL QUERY", query)
+    query = query.split('|')
+    hypothesis = query[0]
+    evidence = query[1]
+    print("QUERY", query, "HYP", hypothesis, "EVI", evidence)
+    total = evidence + hypothesis
+    print("TOTAL", total)
+    upper = hypothesis + "," + evidence
+    print("UPPER", upper, "EVIDENCE", evidence)
+    result = newComputeProbability(upper) / newComputeProbability(evidence)
+    return result
+
+def totalProbability(query):
+    node_name = stringWithoutSign(query)
+    node = net.find(node_name)
+    sum = 0.0
+    for key, value in node.ptable.items():
+        if query in key:
+
+            a = key.split(query)[1]
+            print("KEY", key, "A", a,  "QUERY", query)
+            sum += newComputeProbability(a)*value
+    return(sum)
+
+
 def chainRule(query):
+    query_array = query.split(',')
+
     pass
 
-
-
-
-def probability(query):
-
-    if(query.find('|') != -1):
-        print("QUE | ", query)
-        query = query.split('|')
-        #numerator
-        hypothesis = query[0]
-        hypothesis = hypothesis.split(',')
-        #denominator
-        evidence = query[1]
-        evidence = evidence.split(',')
-        intersection =  evidence + hypothesis
-        intersection = ','.join(intersection)
-        denominator = evidence
-        denominator = ','.join(denominator)
-        result = probability(intersection) / probability(denominator)
-        print("RESULT", result, probability(intersection) , probability(denominator) )
-        return(result)
-
-
-    else:
-        print("QUE ,", query)
-        query = query.split(",")
-        unsigned = []
-        if(len(query) > 1 ):
-            for prob in query:
-                if(prob.find('+') == -1 and prob.find('-') == -1):
-                    print("PROB SIGN", prob.find('+'), prob.find('-'), prob)
-                    unsigned.append(prob)
-            print("Unsigned", unsigned)
-            if (not unsigned):
-                node = net.find(stringWithoutSign(query[0]))
-                query = ''.join(query)
-                print("Encuentra el nodo con", node.__dict__, query)
-                sp = returnSingleProbability(node, query)
-                print("SP", sp)
-                return(sp)
-            else:
-                #chain rule
-                tot_with_hidden = getWithHiddenNodes(query)
-                added =list( set(tot_with_hidden) - set(query))
-        else:
-            hypothesis = query
-            print("QUERYY", hypothesis)
-            node = net.find(stringWithoutSign(hypothesis[0]))
-            print("my node", node.__dict__)
-            # si el nodo obtenido no tiene padres
-            if node.parents is None:
-                #obtener singleProbability del nodo dado
-                sp = returnSingleProbability(node, hypothesis[0])
-                return(sp)
-            else:
-                #si el nodo sí tiene padres entonces hacer total probability
-                n = stringWithoutSign(hypothesis[0])
-                print("n", n)
-                node = net.find(n)
-                print("node", node.__dict__)
-                sum = 0.0
-                for key, value in node.ptable.items():
-                    if hypothesis[0] in key:
-                        a = key.split(hypothesis[0])[1]
-                        print("AAAA", a)
-                        sum += probability(a)*value
-                return(sum)
-
-
-
-
-#compute probability
-def computeProbability(query):
-    print("recibe", query)
-    #hypothesis = primera localidad del arreglo query
-    hypothesis = query[0]
-    #si el query es una sola sentencia
-    if len(query) == 1:
-        #encuentra el nodo
-        node = net.find(stringWithoutSign(hypothesis))
-        # si el nodo obtenido no tiene padres
-        if node.parents is None:
-            #obtener singleProbability del nodo dado
-            sp = returnSingleProbability(node, hypothesis)
+def newComputeProbability(query):
+    print("Thequery", query)
+    query_array = query.split(',')
+    unsigned = []
+    if(len(query_array) > 1 ):
+        #generatequeries
+        #sum(chainRule(current_query))
+        for prob in query_array:
+            if(prob.find('+') == -1 and prob.find('-') == -1):
+                unsigned.append(prob)
+        if (not unsigned):
+            node = net.find(stringWithoutSign(query_array[0]))
+            new_query = ''.join(query).replace(',', '')
+            print("Encuentra el nodo con", node.__dict__, new_query)
+            sp = returnSingleProbability(node, new_query)
+            print("SP", sp)
             return(sp)
         else:
-            #si el nodo sí tiene padres entonces hacer total probability
-            n = stringWithoutSign(hypothesis)
-            node = net.find(n)
-            sum = 0.0
-            for key, value in node.ptable.items():
-                if hypothesis in key:
-                    a = key.split(hypothesis)[1]
-                    sum += computeProbability(a)*value
-            return(sum)
-    #si el query es mayor a un elemento i.e. ['+ill', '-test']
-    elif len(query) > 1:
-        #encontrar el nodo de la hipotesis
-        node = net.find(stringWithoutSign(hypothesis))
-        #evidence = segunda localidad
-        evidence = query[1]
-        # numerator = separar cada nodo contenido en la hip
-        numerator = query[0].split(',')
-        # denominator = separar por coma cada nodo contenido en el evidencia
-        denominator = query[1].split(',')
-        #total igual a un arreglo que tiene los elementos de numerator y denominator
-        total = numerator + denominator
-        print("Total", total)
-        #tot_with_hidden igual a un arreglo que tiene los nodos de total y sus ancestros
-        tot_with_hidden = getWithHiddenNodes(total)
-        #armar nueva query de la concatenacion de total
-        newQuery = ''.join(total)
-        print("nq", newQuery, node.name)
-        #hacer query de probabilidad con el nuevo query construido
-        sp = returnSingleProbability(node, newQuery)
-        #si encontró el query, es decir, es un nodo que tiene dicha key en el ptable
-        if( sp > -1):
-            #regresar sp
-            return(sp)
-        else:
-            #added = al arreglo de la diferencia de elementos del total con ancestros y el total,
-            #es decir, solo los nodos que se añadieron
-            added =list( set(tot_with_hidden) - set(total))
-
-            print("Added", added)
-            print("tot", tot_with_hidden)
-            print("La", total)
-            #resultado = 1
-            result = 1
-            querystr = ""
-            for position in total:
-                node = net.find(stringWithoutSign(position))
-                print("N: ",node.__dict__)
-                parents = node.parents
-                if(parents is None):
-                    print("Parents none for", node.__dict__)
-                else:
-                    if node.name in position:
-                        querystr += position
-                    for p in parents:
-                        for element in total:
-                            if p in element:
-                                print("found in", p, element)
-                                querystr += element
-                        else:
-                            pass
-            querystr = re.findall('[+|-][a-zA-Z0-9]*', querystr)
             #chain rule
-            result += computeProbability(querystr)
-            return result
-
-            pass
+            tot_with_hidden = getWithHiddenNodes(query)
+            added =list( set(tot_with_hidden) - set(query))
+        pass
+    else:
+        query_probability = str(query_array[0])
+        node_name = stringWithoutSign(query_probability)
+        node = net.find(node_name)
+        print("NODE NAME, NODE", node_name, node.__dict__)
+        if(node.parents is None):
+            #get direct probability from ptable
+            sp = returnSingleProbability(node, query_probability)
+            print("ENTERED AND SHOULD RETURN", sp)
+            return(sp)
+        else:
+            #total probability
+            #si el nodo sí tiene padres entonces hacer total probability
+            cp = totalProbability(query_probability)
+            return(cp)
 
 
 
@@ -245,13 +158,15 @@ def processQueries():
         queryarr.append(a)
     current = []
     for q in queryarr:
-        #current = q.split('|')
-        print(probability(q))
-
-
-
-
-
+        current = q.split('|')
+        print("\nCURRENT QUERY", current)
+        if (len(current) > 1):
+            current = '|'.join(current)
+            prob = conditional(current)
+        else:
+            current = str(current[0])
+            prob = newComputeProbability(current)
+        print(prob)
 
 def main():
     #arreglo de nodos vacío
