@@ -133,6 +133,7 @@ def newComputeProbability(query):
     ##print("Thequery", query)
     query_array = query.split(',')
     unsigned = []
+    #if intersection
     if(len(query_array) > 1 ):
         total_related_nodes = getWithHiddenNodes(query_array)
         #print("TOTAL RELATED NODES ", total_related_nodes)
